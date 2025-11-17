@@ -1,64 +1,142 @@
-// gecko.js
-// API GeckoTerminal (API pública da CoinGecko focada em DEX, retorna JSON com dados de pools) :contentReference[oaicite:0]{index=0}
+// ===================================
+// FlashScreener + GeckoTerminal API
+// ===================================
 
-const GECKO_BASE_URL = 'https://api.geckoterminal.com/api/v2';
-const NETWORK = 'solana';
-
-// Exemplo: mint e pool de teste – depois você troca para o token real
-const TOKEN_MINT  = 'COLOQUE_AQUI_O_MINT_DO_TOKEN';
-const POOL_ADDRESS = 'COLOQUE_AQUI_O_ENDERECO_DA_POOL_RAYDIUM';
-
-async function fetchPoolData(poolAddress) {
-  const url = `${GECKO_BASE_URL}/networks/${NETWORK}/pools/${poolAddress}`;
-  const res = await fetch(url, { headers: { Accept: 'application/json' } }); // fetch = função nativa do browser para requisição HTTP
-
-  if (!res.ok) {
-    console.error('Erro GeckoTerminal:', res.status, await res.text());
-    return null;
-  }
-
-  const json = await res.json(); // JSON = formato de dados padrão das APIs web
-  console.log('Resposta GeckoTerminal (pool):', json);
-
-  // Na resposta do /pools, os dados vêm em json.data.attributes :contentReference[oaicite:1]{index=1}
-  return json.data?.attributes ?? null;
+// 1. PEGAR CONTRACT ADDRESS DA URL
+function getCA() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("ca")?.trim();
 }
 
-async function fetchTokenInfo(tokenMint) {
-  const url = `${GECKO_BASE_URL}/networks/${NETWORK}/tokens/${tokenMint}`;
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+// Caso não passe CA, usar um de teste
+const CONTRACT = getCA() || "So11111111111111111111111111111111111111112";
 
-  if (!res.ok) {
-    console.error('Erro token GeckoTerminal:', res.status, await res.text());
-    return null;
-  }
+// 2. URL DO GECKO
+const API = `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${CONTRACT}`;
 
-  const json = await res.json();
-  console.log('Resposta GeckoTerminal (token):', json);
+// 3. FORMATADORES
+const fmtUSD = (n) =>
+  n ? "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 6 }) : "--";
 
-  // token info normalmente vem em json.data.attributes (name, symbol, image_url, websites, etc.) :contentReference[oaicite:2]{index=2}
-  return json.data?.attributes ?? null;
-}
+const fmtSOL = (usdPrice, solPrice) =>
+  solPrice
+    ? solPrice + " SOL"
+    : usdPrice
+    ? (usdPrice / 200).toFixed(6) + " SOL"
+    : "--";
 
-// Função que será chamada quando a página terminar de carregar (DOM = estrutura de elementos HTML na página)
-async function initPage() {
+// % formatter
+const fmtPercent = (n) =>
+  n
+    ? (Number(n) >= 0 ? "+" : "") + Number(n).toFixed(2) + "%"
+    : "0%";
+
+// 4. FUNÇÃO PRINCIPAL
+async function loadToken() {
   try {
-    const [poolAttrs, tokenAttrs] = await Promise.all([
-      fetchPoolData(POOL_ADDRESS),
-      fetchTokenInfo(TOKEN_MINT),
-    ]);
+    const r = await fetch(API);
+    const json = await r.json();
 
-    // Por enquanto só loga no console para você inspecionar os campos
-    console.log('poolAttrs:', poolAttrs);
-    console.log('tokenAttrs:', tokenAttrs);
+    const data = json.data?.attributes;
+    if (!data) return;
 
-    // Próximo passo: aqui a gente pega poolAttrs / tokenAttrs
-    // e coloca dentro dos elementos da direita (liquidity, mkt cap, etc.)
-    // usando document.querySelector(...) e textContent.
-  } catch (err) {
-    console.error('Erro geral ao inicializar página:', err);
+    // ==============================
+    // EXTRAINDO OS CAMPOS DO GECKO
+    // ==============================
+    const name = data.name;
+    const symbol = data.symbol;
+    const priceUsd = Number(data.price_usd);
+    const priceSol = data.price_native;
+    const fdv = data.fdv_usd;
+    const mcap = data.market_cap_usd;
+    const liquidity = data.liquidity_usd;
+    const volume24 = data.volume_usd?.h24;
+    const logo = data.image_url;
+
+    const change5m = data.price_change_percentage?.m5;
+    const change1h = data.price_change_percentage?.h1;
+    const change6h = data.price_change_percentage?.h6;
+    const change24h = data.price_change_percentage?.h24;
+
+    const buys = data.swap_count?.buys24h || 0;
+    const sells = data.swap_count?.sells24h || 0;
+
+    const created = data.created_at;
+    const ca = data.address;
+    const pair = data.top_pair?.id;
+    const pairAddress = data.top_pair?.attributes?.address;
+
+    // ==============================
+    // PREENCHENDO NO HTML
+    // ==============================
+
+    // HEADER PRINCIPAL
+    document.querySelector(".pair-title-main").textContent = `${symbol}/SOL`;
+
+    // SUBHEADER
+    const sub = document.querySelector(".pair-sub");
+    if (sub) sub.textContent = ` (Market Cap) on Raydium · 1D · flashscreener.com`;
+
+    // NOME
+    document.querySelector(".token-name").textContent = name;
+
+    // IMAGEM (PFP)
+    if (logo) {
+      const pfp = document.querySelector(".pfp-circle");
+      pfp.innerHTML = `<img src="${logo}" style="width:100%;height:100%;border-radius:50%">`;
+    }
+
+    // METRICS
+    document.querySelectorAll(".metric-box")[0].querySelector(".metric-value").textContent = fmtUSD(liquidity);
+    document.querySelectorAll(".metric-box")[1].querySelector(".metric-value").textContent = fmtUSD(mcap);
+    document.querySelectorAll(".metric-box")[2].querySelector(".metric-value").textContent = fmtUSD(fdv);
+
+    // PRICES
+    document.querySelectorAll(".price-box")[0].querySelector(".price-value").textContent = fmtUSD(priceUsd);
+    document.querySelectorAll(".price-box")[1].querySelector(".price-value").textContent =
+      fmtSOL(priceUsd, priceSol);
+
+    // CHANGES
+    document.querySelectorAll(".perf-box")[0].querySelector(".perf-value").textContent = fmtPercent(change5m);
+    document.querySelectorAll(".perf-box")[1].querySelector(".perf-value").textContent = fmtPercent(change1h);
+    document.querySelectorAll(".perf-box")[2].querySelector(".perf-value").textContent = fmtPercent(change6h);
+    document.querySelectorAll(".perf-box")[3].querySelector(".perf-value").textContent = fmtPercent(change24h);
+
+    // VOLUME
+    document.querySelector(".volume-value").textContent = fmtUSD(volume24);
+
+    // BARRA VOLUME
+    const total = buys + sells;
+    const sellsPct = total ? (sells / total) * 100 : 50;
+    const buysPct = total ? (buys / total) * 100 : 50;
+
+    const sellsBar = document.querySelector(".volume-sells");
+    const buysBar = document.querySelector(".volume-buys");
+    sellsBar.style.width = sellsPct + "%";
+    buysBar.style.width = buysPct + "%";
+
+    document.querySelector(".volume-legend").innerHTML = `
+      <span>Sells ${sells}</span>
+      <span>Buys ${buys}</span>
+    `;
+
+    // DETAILS
+    document.querySelector(".details-link").textContent = ca.slice(0, 6) + "..." + ca.slice(-6);
+    document.querySelector(".details-link").href = `https://solscan.io/token/${ca}`;
+
+    document.querySelectorAll(".details-row")[3].querySelector(".details-link").href =
+      `https://solscan.io/account/${pairAddress}`;
+    document.querySelectorAll(".details-row")[3].querySelector(".details-link").textContent =
+      pairAddress.slice(0, 6) + "..." + pairAddress.slice(-6);
+
+    // DATA DE CRIAÇÃO
+    const dateStr = new Date(created).toLocaleDateString("en-US");
+    document.querySelectorAll(".details-row")[1].querySelector(".details-text").textContent =
+      dateStr;
+
+  } catch (e) {
+    console.error("Erro ao carregar dados GeckoTerminal:", e);
   }
 }
 
-// Garante que só roda depois que o HTML estiver pronto
-document.addEventListener('DOMContentLoaded', initPage);
+loadToken();
