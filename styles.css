@@ -29,7 +29,8 @@
   --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.6);
 }
 
-html, body {
+html,
+body {
   width: 100%;
   height: 100%;
 }
@@ -71,14 +72,16 @@ body {
   color: #f9fafb;
 }
 
+/* SEARCH + AUTOCOMPLETE */
 .search-wrapper {
   flex: 1;
   display: flex;
   justify-content: center;
+  position: relative;
+  max-width: 360px;
 }
 
 .search-input {
-  max-width: 340px;
   width: 100%;
   height: 32px;
   display: flex;
@@ -107,6 +110,55 @@ body {
 .search-input input::placeholder {
   color: #6b7280;
   font-size: 12px;
+}
+
+/* DROPDOWN AUTOCOMPLETE */
+#search-results {
+  position: absolute;
+  top: 38px;
+  width: 100%;
+  background: #0b0f1f;
+  border: 1px solid #22263a;
+  border-radius: 8px;
+  padding: 6px 0;
+  display: none;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+}
+
+.search-item {
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.search-item:hover {
+  background: rgba(77, 15, 255, 0.12);
+}
+
+.search-item img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.search-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.search-item-name {
+  font-size: 13px;
+  color: #e5e7eb;
+  font-weight: 500;
+}
+
+.search-item-symbol {
+  font-size: 11px;
+  color: #9ca3af;
 }
 
 .topbar-right {
@@ -258,7 +310,7 @@ body {
   overflow: hidden;
 }
 
-/* Vertical toolbar (TradingView style) */
+/* Vertical toolbar */
 .chart-toolbar {
   width: 34px;
   background: #050814;
@@ -531,7 +583,7 @@ body {
   color: #6b7280;
 }
 
-/* Tabs: X/Twitter, Website, Telegram */
+/* Tabs */
 .tab-row {
   display: flex;
   gap: 6px;
@@ -669,12 +721,12 @@ body {
 
 .volume-sells {
   height: 100%;
-  background: linear-gradient(to Right, #7f1d1d, #ef4444);
+  background: linear-gradient(to right, #7f1d1d, #ef4444);
 }
 
 .volume-buys {
   height: 100%;
-  background: linear-gradient(to Right, #166534, #22c55e);
+  background: linear-gradient(to right, #166534, #22c55e);
 }
 
 .volume-legend {
@@ -759,59 +811,6 @@ body {
   .tx-row {
     grid-template-columns: 70px 1.4fr 0.9fr 0.9fr 1fr 60px;
   }
-
-   .search-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 340px;
-}
-
-#search-results {
-  position: absolute;
-  top: 38px;
-  width: 100%;
-  background: #0b0f1f;
-  border: 1px solid #22263a;
-  border-radius: 8px;
-  padding: 6px 0;
-  display: none;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.5);
-  z-index: 99;
-}
-
-.search-item {
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
-
-.search-item:hover {
-  background: rgba(77, 15, 255, 0.12);
-}
-
-.search-item img {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-}
-
-.search-item-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.search-item-name {
-  font-size: 13px;
-  color: #e5e7eb;
-  font-weight: 500;
-}
-
-.search-item-symbol {
-  font-size: 11px;
-  color: #9ca3af;
-}
 
   .perf-changes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
