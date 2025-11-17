@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FlashScreener Token Page</title>
 
+  <!-- Fonte -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- TradingView -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body>
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand">
-        FLASHSCREENER
-      </div>
+      <div class="brand">FLASHSCREENER</div>
 
       <div class="search-wrapper">
-  <div class="search-input">
-    <span class="search-icon">🔍</span>
-    <input type="text" placeholder="Search..." />
-  </div>
+        <div class="search-input">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search...">
+        </div>
 
-  <!-- AUTOCOMPLETE DROPDOWN -->
-  <div class="search-results" id="search-results"></div>
-</div>
-
+        <!-- AUTOCOMPLETE -->
+        <div class="search-results" id="search-results"></div>
+      </div>
 
       <div class="topbar-right">
         <div class="top-pill">USD / SOL</div>
@@ -38,11 +38,12 @@
     </div>
   </header>
 
-  <!-- MAIN LAYOUT -->
+  <!-- MAIN -->
   <main class="layout">
-    <!-- LEFT: CHART + TRANSACTIONS -->
+    <!-- LEFT -->
     <section class="left-column">
-      <!-- CHART HEADER TIMEFRAMES -->
+
+      <!-- TIMEFRAMES -->
       <div class="chart-top-row">
         <div class="tf-group">
           <button class="tf-btn active">5m</button>
@@ -55,43 +56,35 @@
           <button class="tf-btn">12h</button>
           <button class="tf-btn">D</button>
         </div>
+
         <div class="tf-right-icons">
           <div class="tf-small-pill">Price / MCap</div>
           <div class="tf-small-pill">Full</div>
         </div>
       </div>
 
-      <!-- PAIR TITLE -->
+      <!-- PAIR HEADER -->
       <div class="pair-header">
         <div class="pair-name-line">
           <span class="pair-dot"></span>
-          <span class="pair-title-main">Grrr/SOL</span>
-          <span class="pair-sub"> (Market Cap) on Raydium · 1D · dexscreener.com</span>
+          <span class="pair-title-main">TOKEN/SOL</span>
+          <span class="pair-sub">loading...</span>
         </div>
         <div class="pair-volume-label">Volume</div>
       </div>
 
-      <!-- CHART AREA -->
+      <!-- CHART -->
       <div class="chart-area">
-        <!-- Barra lateral de ferramentas (imitando TradingView) -->
         <div class="chart-toolbar">
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
-          <div class="toolbar-btn"></div>
+          <div class="toolbar-btn"></div><div class="toolbar-btn"></div>
+          <div class="toolbar-btn"></div><div class="toolbar-btn"></div>
+          <div class="toolbar-btn"></div><div class="toolbar-btn"></div>
+          <div class="toolbar-btn"></div><div class="toolbar-btn"></div>
           <div class="toolbar-btn"></div>
         </div>
 
-        <!-- Aqui você encaixa o widget do TradingView -->
         <div class="chart-canvas" id="tv-chart-container">
-          <!-- Remova esse texto quando integrar o gráfico real -->
-          <div class="chart-placeholder-text">
-            TradingView Chart
-          </div>
+          <div class="chart-placeholder-text">Loading chart...</div>
         </div>
       </div>
 
@@ -106,8 +99,9 @@
           <button class="bottom-tf-btn">5d</button>
           <button class="bottom-tf-btn">1d</button>
         </div>
+
         <div class="chart-footer-right">
-          <span>21:35:46 (UTC-3)</span>
+          <span>UTC</span>
           <span class="dot-separator">•</span>
           <span>%</span>
           <span class="dot-separator">•</span>
@@ -117,95 +111,42 @@
         </div>
       </div>
 
-      <!-- TRANSACTIONS TABLE -->
+      <!-- TRANSACTIONS -->
       <section class="transactions">
         <div class="transactions-title">Transactions</div>
 
         <div class="transactions-header-row">
           <span>time</span>
           <span>wallet</span>
-          <span>quantidadeSOL</span>
-          <span>quantidadeUSD</span>
-          <span>quantidadeCOINS</span>
+          <span>sol</span>
+          <span>usd</span>
+          <span>coins</span>
           <span>txn</span>
         </div>
 
-        <!-- Rows -->
-        <div class="transactions-rows">
-          <!-- Example rows: alternate red/green like screenshot -->
-          <div class="tx-row tx-sell">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-          <div class="tx-row tx-sell">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-          <div class="tx-row tx-sell">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-          <div class="tx-row tx-buy">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-          <div class="tx-row tx-buy">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-          <div class="tx-row tx-buy">
-            <span>time</span>
-            <span>wallet</span>
-            <span>quantidadeSOL</span>
-            <span>quantidadeUSD</span>
-            <span>quantidadeCOINS</span>
-            <span>txn</span>
-          </div>
-        </div>
+        <div class="transactions-rows"></div>
       </section>
     </section>
 
-    <!-- RIGHT: TOKEN PANEL -->
+    <!-- RIGHT PANEL -->
     <aside class="right-column">
       <div class="token-panel">
-        <!-- Header with pfp + ticker -->
+
         <div class="token-header">
-          <div class="pfp-circle">
-            <span>pfp</span>
-          </div>
+          <div class="pfp-circle"></div>
+
           <div class="ticker-title">
             <span class="ticker-main">$TICKER</span>
             <span class="badge-verified">✔</span>
           </div>
+
           <button class="menu-button">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
           </button>
         </div>
 
         <div class="token-name-block">
-          <div class="token-name">token name</div>
+          <div class="token-name">Loading...</div>
           <div class="token-tags">
             <span>Solana</span>
             <span>Raydium</span>
@@ -213,104 +154,103 @@
           </div>
         </div>
 
-        <!-- BANNER -->
-        <div class="banner-box">
-          <span>BANNER 3:1</span>
-        </div>
+        <div class="banner-box">BANNER 3:1</div>
 
-        <!-- LINKS TABS -->
         <div class="tab-row">
           <button class="tab-btn active">X/Twitter</button>
           <button class="tab-btn">Website</button>
           <button class="tab-btn">Telegram</button>
         </div>
 
-        <!-- LIQ / MC / FDV -->
         <div class="metrics-row">
           <div class="metric-box">
             <div class="metric-label">LIQUIDITY</div>
-            <div class="metric-value">$169K</div>
+            <div class="metric-value">$0</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">MKT CAP</div>
-            <div class="metric-value">$699K</div>
+            <div class="metric-value">$0</div>
           </div>
           <div class="metric-box">
             <div class="metric-label">FDV</div>
-            <div class="metric-value">$699K</div>
+            <div class="metric-value">$0</div>
           </div>
         </div>
 
-        <!-- PRICES -->
         <div class="price-row">
           <div class="price-box">
             <div class="metric-label">Price USD</div>
-            <div class="price-value">$0.042561</div>
+            <div class="price-value">$0</div>
           </div>
           <div class="price-box">
             <div class="metric-label">Price SOL</div>
-            <div class="price-value">0.061865 SOL</div>
+            <div class="price-value">0 SOL</div>
           </div>
         </div>
 
-        <!-- PERFORMANCE -->
         <div class="perf-row">
           <div class="perf-changes">
             <div class="perf-box perf-red">
               <div class="perf-label">5m</div>
-              <div class="perf-value">33.69%</div>
+              <div class="perf-value">0%</div>
             </div>
             <div class="perf-box perf-green">
               <div class="perf-label">1h</div>
-              <div class="perf-value">323.69%</div>
+              <div class="perf-value">0%</div>
             </div>
             <div class="perf-box perf-green">
               <div class="perf-label">6h</div>
-              <div class="perf-value">3293.69%</div>
+              <div class="perf-value">0%</div>
             </div>
             <div class="perf-box perf-green">
               <div class="perf-label">24h</div>
-              <div class="perf-value">35293.69%</div>
+              <div class="perf-value">0%</div>
             </div>
           </div>
 
           <div class="volume-block">
             <div class="metric-label">VOLUME</div>
-            <div class="volume-value">$420,699.00</div>
+            <div class="volume-value">$0</div>
             <div class="volume-bar">
               <div class="volume-sells"></div>
               <div class="volume-buys"></div>
             </div>
             <div class="volume-legend">
-              <span>Sells 420</span>
-              <span>Buys 690</span>
+              <span>Sells 0</span>
+              <span>Buys 0</span>
             </div>
           </div>
         </div>
 
-        <!-- DETAILS -->
         <div class="details-section">
           <div class="details-title">DETAILS</div>
+
           <div class="details-row">
             <span class="details-label">CA:</span>
-            <a href="#" class="details-link">H9Bkz...Rapump</a>
+            <a href="#" class="details-link">---</a>
           </div>
+
           <div class="details-row">
             <span class="details-label">Created:</span>
-            <span class="details-text">11/27/2025 · 8 days</span>
+            <span class="details-text">---</span>
           </div>
+
           <div class="details-row">
             <span class="details-label">Deployer:</span>
-            <a href="#" class="details-link">CJsikz...wiuSj</a>
+            <a href="#" class="details-link">---</a>
           </div>
+
           <div class="details-row">
             <span class="details-label">Pair:</span>
-            <a href="#" class="details-link">H9Bkz...TuWhv</a>
+            <a href="#" class="details-link">---</a>
           </div>
         </div>
+
       </div>
     </aside>
+
   </main>
+
   <script src="gecko.js"></script>
 </body>
 </html>
