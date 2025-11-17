@@ -102,150 +102,118 @@ function startLiveTrades(pairAddress) {
    5. CARREGAR TOKEN PRINCIPAL (GeckoTerminal v3)
 ------------------------------------------------------------ */
 async function loadToken() {
-  const API = `https://api.geckoterminal.com/api/v2/networks/solana/tokens/${CONTRACT}?include=tokens,pairs`;
-
   try {
-    const r = await fetch(API);
-    const json = await r.json();
+    // 1) Buscar info básica do token
+    const infoURL = `https://api.geckoterminal.com/api/v3/networks/solana/tokens/${CONTRACT}`;
+    const infoRes = await fetch(infoURL);
+    const infoJson = await infoRes.json();
+    const token = infoJson.data?.attributes;
 
-    const data = json.data?.attributes;
-    const pair = data?.top_pair;
-    const pairAddress = pair?.attributes?.address;
+    if (!token) {
+      console.error("Token não encontrado");
+      return;
+    }
 
-    if (!data || !pairAddress) {
-      console.error("Token ou pair não encontrado.");
+    // 2) Buscar pares/pools (IMPORTANTE!)
+    const poolsURL = `https://api.geckoterminal.com/api/v3/networks/solana/tokens/${CONTRACT}/pools`;
+    const poolsRes = await fetch(poolsURL);
+    const poolsJson = await poolsRes.json();
+
+    if (!poolsJson.data || poolsJson.data.length === 0) {
+      console.error("Nenhum par encontrado para esse token.");
+      return;
+    }
+
+    // Pega o par mais líquido (como DexScreener)
+    const bestPool = poolsJson.data[0];
+    const pairAddress = bestPool.attributes.address;
+
+    if (!pairAddress) {
+      console.error("Pair sem endereço.");
       return;
     }
 
     /* ------------------------------------------
-       Header principal
+       UI — Preencher painel
     ------------------------------------------- */
+
     document.querySelector(".pair-title-main").textContent =
-      `${data.symbol}/SOL`;
+      `${token.symbol}/SOL`;
     document.querySelector(".pair-sub").textContent =
       `(Market Cap) • FlashScreener`;
 
-    document.querySelector(".token-name").textContent = data.name;
+    document.querySelector(".token-name").textContent = token.name;
 
-    if (data.image_url) {
+    if (token.image_url) {
       const pfp = document.querySelector(".pfp-circle");
-      pfp.innerHTML = `<img src="${data.image_url}" style="width:100%;height:100%;border-radius:50%">`;
+      pfp.innerHTML = `<img src="${token.image_url}" style="width:100%;height:100%;border-radius:50%">`;
     }
 
-    /* ------------------------------------------
-       Métricas
-    ------------------------------------------- */
-    document
-      .querySelectorAll(".metric-box")[0]
-      .querySelector(".metric-value").textContent = fmtUSD(data.liquidity_usd);
+    // Métricas
+    document.querySelectorAll(".metric-box")[0].querySelector(".metric-value").textContent =
+      fmtUSD(bestPool.attributes.reserve_in_usd);
 
-    document
-      .querySelectorAll(".metric-box")[1]
-      .querySelector(".metric-value").textContent = fmtUSD(data.market_cap_usd);
+    document.querySelectorAll(".metric-box")[1].querySelector(".metric-value").textContent =
+      fmtUSD(token.market_cap_usd);
 
-    document
-      .querySelectorAll(".metric-box")[2]
-      .querySelector(".metric-value").textContent = fmtUSD(data.fdv_usd);
+    document.querySelectorAll(".metric-box")[2].querySelector(".metric-value").textContent =
+      fmtUSD(token.fdv_usd);
 
-    document
-      .querySelectorAll(".price-box")[0]
-      .querySelector(".price-value").textContent = fmtUSD(data.price_usd);
+    // Preços
+    document.querySelectorAll(".price-box")[0].querySelector(".price-value").textContent =
+      fmtUSD(token.price_usd);
 
-    document
-      .querySelectorAll(".price-box")[1]
-      .querySelector(".price-value").textContent = fmtSOL(
-        data.price_usd,
-        data.price_native
-      );
+    document.querySelectorAll(".price-box")[1].querySelector(".price-value").textContent =
+      fmtSOL(token.price_usd, token.price_native);
 
-    const c = data.price_change_percentage;
+    // Performance
+    const c = token.price_change_percentage;
+    document.querySelectorAll(".perf-box")[0].querySelector(".perf-value").textContent =
+      fmtPercent(c.m5);
+    document.querySelectorAll(".perf-box")[1].querySelector(".perf-value").textContent =
+      fmtPercent(c.h1);
+    document.querySelectorAll(".perf-box")[2].querySelector(".perf-value").textContent =
+      fmtPercent(c.h6);
+    document.querySelectorAll(".perf-box")[3].querySelector(".perf-value").textContent =
+      fmtPercent(c.h24);
 
-    document.querySelectorAll(".perf-box")[0].querySelector(
-      ".perf-value"
-    ).textContent = fmtPercent(c.m5);
-    document.querySelectorAll(".perf-box")[1].querySelector(
-      ".perf-value"
-    ).textContent = fmtPercent(c.h1);
-    document.querySelectorAll(".perf-box")[2].querySelector(
-      ".perf-value"
-    ).textContent = fmtPercent(c.h6);
-    document.querySelectorAll(".perf-box")[3].querySelector(
-      ".perf-value"
-    ).textContent = fmtPercent(c.h24);
-
-    /* ------------------------------------------
-       Volume
-    ------------------------------------------- */
-    const buys = data.swap_count?.buys24h || 0;
-    const sells = data.swap_count?.sells24h || 0;
+    // Volume
+    const buys = token.swap_count?.buys24h || 0;
+    const sells = token.swap_count?.sells24h || 0;
     const total = buys + sells;
-
     const buysPct = total ? (buys / total) * 100 : 50;
     const sellsPct = 100 - buysPct;
 
-    document.querySelector(".volume-value").textContent = fmtUSD(
-      data.volume_usd?.h24 || 0
-    );
+    document.querySelector(".volume-value").textContent =
+      fmtUSD(token.volume_usd?.h24 || 0);
 
     document.querySelector(".volume-sells").style.width = sellsPct + "%";
     document.querySelector(".volume-buys").style.width = buysPct + "%";
 
-    document.querySelector(
-      ".volume-legend"
-    ).innerHTML = `<span>Sells ${sells}</span><span>Buys ${buys}</span>`;
+    document.querySelector(".volume-legend").innerHTML =
+      `<span>Sells ${sells}</span><span>Buys ${buys}</span>`;
 
-    /* ------------------------------------------
-       DETAILS
-    ------------------------------------------- */
-    // CA
-    document.querySelectorAll(".details-row")[0]
-      .querySelector(".details-link").textContent =
+    // DETAILS
+    document.querySelectorAll(".details-row")[0].querySelector(".details-link").textContent =
       CONTRACT.slice(0, 6) + "..." + CONTRACT.slice(-6);
-
-    document.querySelectorAll(".details-row")[0]
-      .querySelector(".details-link").href =
+    document.querySelectorAll(".details-row")[0].querySelector(".details-link").href =
       `https://solscan.io/token/${CONTRACT}`;
 
-    // Created
-    const createdDate = new Date(data.created_at).toLocaleDateString("en-US");
-    document.querySelectorAll(".details-row")[1]
-      .querySelector(".details-text").textContent = createdDate;
-
-    // Deployer
-    const deployer =
-      pair.attributes?.base_token?.data?.attributes?.creator ||
-      pair.attributes?.quote_token?.data?.attributes?.creator ||
-      null;
-
-    if (deployer) {
-      document.querySelectorAll(".details-row")[2]
-        .querySelector(".details-link").textContent =
-        deployer.slice(0, 4) + "..." + deployer.slice(-4);
-
-      document.querySelectorAll(".details-row")[2]
-        .querySelector(".details-link").href =
-        `https://solscan.io/account/${deployer}`;
-    }
-
-    // Pair
-    document.querySelectorAll(".details-row")[3]
-      .querySelector(".details-link").textContent =
+    document.querySelectorAll(".details-row")[3].querySelector(".details-link").textContent =
       pairAddress.slice(0, 6) + "..." + pairAddress.slice(-6);
-
-    document.querySelectorAll(".details-row")[3]
-      .querySelector(".details-link").href =
+    document.querySelectorAll(".details-row")[3].querySelector(".details-link").href =
       `https://solscan.io/account/${pairAddress}`;
 
-
     /* ------------------------------------------
-       TradingView
+       TradingView (agora 100% funcional)
     ------------------------------------------- */
     loadTradingView(pairAddress);
 
     /* ------------------------------------------
-       Live Trades Stream
+       WebSocket real-time trades
     ------------------------------------------- */
     startLiveTrades(pairAddress);
+
   } catch (err) {
     console.error("Erro ao carregar token:", err);
   }
