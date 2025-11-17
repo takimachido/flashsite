@@ -219,3 +219,54 @@ async function loadToken() {
 ----------------------------- */
 loadToken();
 
+/* ============================================================
+   SEARCH BAR FUNCTIONALITY
+============================================================ */
+
+// Elementos
+const searchInput = document.querySelector(".search-input input");
+
+// Detectar ENTER
+searchInput.addEventListener("keydown", async (e) => {
+  if (e.key === "Enter") {
+    const query = searchInput.value.trim();
+    if (!query) return;
+
+    // 1) SE FOR UM CONTRACT ADDRESS
+    if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(query)) {
+      window.location.href = `index.html?ca=${query}`;
+      return;
+    }
+
+    // 2) SE FOR UM TICKER OU NOME → buscar no GeckoTerminal
+    searchTokenByName(query);
+  }
+});
+
+
+async function searchTokenByName(q) {
+  try {
+    const url =
+      `https://api.geckoterminal.com/api/v2/search?query=${encodeURIComponent(q)}&limit=1`;
+
+    const r = await fetch(url);
+    const js = await r.json();
+
+    if (!js.data || js.data.length === 0) {
+      alert("Token não encontrado.");
+      return;
+    }
+
+    const token = js.data[0];
+
+    // GeckoTerminal retorna o CA em `attributes.address`
+    const ca = token.attributes.address;
+
+    // Redirecionar
+    window.location.href = `index.html?ca=${ca}`;
+  } catch (err) {
+    console.error("Erro ao buscar token:", err);
+    alert("Erro ao buscar token.");
+  }
+}
+
